@@ -1,15 +1,7 @@
 on:
   workflow_dispatch: {}
   pull_request: {}
-  push:
-    branches:
-    - main
-    - master
-    paths:
-    - .github/workflows/semgrep.yml
-  schedule:
-  # random HH:MM to avoid a load spike on GitHub Actions at 00:00
-  - cron: 13 0 * * *
+  push: {}  # Será acionado em qualquer push no repositório
 name: Semgrep
 jobs:
   semgrep:
@@ -21,4 +13,14 @@ jobs:
       image: returntocorp/semgrep
     steps:
     - uses: actions/checkout@v3
-    - run: semgrep ci
+    - name: Executar Semgrep
+      run: semgrep ci --json-output results.json
+    - name: Verificar Vulnerabilidades Críticas
+      run: |
+        # Script para analisar o arquivo de resultados e quebrar a build se encontrar vulnerabilidades críticas
+        cat results.json
+        jq '.results[] | select(.extra.severity == "ERROR")' results.json > critical_results.json
+        if [ -s critical_results.json ]; then
+          echo "Vulnerabilidades críticas encontradas."
+          exit 1
+        fi
