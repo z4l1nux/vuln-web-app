@@ -14,7 +14,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Executar Semgrep
-      run: semgrep ci -j > results.json
+      run: semgrep ci > results.json
     - name: Verificar Vulnerabilidades Críticas
       run: |
         # Script para analisar o arquivo de resultados e quebrar a build se encontrar vulnerabilidades críticas
